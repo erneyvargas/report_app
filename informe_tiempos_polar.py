@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from conexion import conexion
 import pandas as pd
 from buissnes.phases import Phases
@@ -7,6 +9,7 @@ from buissnes.tercero import Tercero
 from buissnes.basicresurces import Basicresources
 from buissnes.worksstep import Worksstep
 from buissnes.manifiesto import Manifiesto
+from buissnes.remesa import Remesa
 from buissnes.reports import Reports
 from util.correo import Correo
 from util.style_excel import ExcelStyle
@@ -30,6 +33,7 @@ df_workssteps = Worksstep(conexion_app).get_worksstep(df_works)
 df_reports = Reports(conexion_app).get_reports(df_workssteps)
 
 df_manifiesto = Manifiesto(conexion_sw).get_manifiesto(df_works)
+df_remesa = Remesa(conexion_sw).get_remesa(df_manifiesto)
 df_tercero = Tercero(conexion_sw).get_tercero(df_basicresources)
 
 
@@ -41,16 +45,21 @@ df_merge_basicresources = pd.merge(df_basicresources, df_tercero, how="left", on
 # Merge para vincular el trabajo con el tercero
 df_merge_works = pd.merge(df_works, df_merge_basicresources[["id_responsible_id", "tercero_documento", "nombre_completo"]],
                         how="left", on="id_responsible_id")
+df_merge_remesa_manifiesto = pd.merge(df_manifiesto, df_remesa[["manifiesto_codigo", "remesa_codigo_impreso"]],
+                        how="left", on="manifiesto_codigo")
 
 # Merge para vincular el Manifiesto con El trabajo
-df_manifiesto.rename(columns={'manifiesto_codigo':'document'},inplace=True)
+df_merge_remesa_manifiesto.rename(columns={'manifiesto_codigo':'document'},inplace=True)
 # Se pasan los manifiestos a tipo Numerico
 df_merge_works['document'] = pd.to_numeric(df_merge_works['document'])
 
-df_merge_manifiesto = pd.merge(df_merge_works, df_manifiesto[["document", "manifiesto_codigo_impreso", "vehiculo_placa"]],
+df_merge_manifiesto = pd.merge(df_merge_works, df_merge_remesa_manifiesto[["document", "manifiesto_codigo_impreso", "vehiculo_placa", "remesa_codigo_impreso"]],
                         how="left", on="document")
+########### Se restan 5 horas para ajustar el informe debido a que la bd regitra estos eventos con 5 horas adelantadas ###########
+# Si se desa dejar el campo original en el dataframe df_workssteps_pivote se cambia el campo "reportdate_mod" por "reportdate"
+df_workssteps["reportdate_mod"] = df_workssteps["reportdate"] - timedelta(hours=5)
 
-df_workssteps_pivote = df_workssteps.pivot(index="id_work_id", columns="tittle", values="reportdate").reset_index()
+df_workssteps_pivote = df_workssteps.pivot(index="id_work_id", columns="tittle", values="reportdate_mod").reset_index()
 
 
 df_reports.rename(columns={'id':'report'},inplace=True)
@@ -68,6 +77,7 @@ df_result["ESTADO"] = df_merge_manifiesto["state"]
 df_result["RESPONSABLE"] = df_merge_manifiesto["nombre_completo"]
 df_result["DOCUMENTO"] = df_merge_manifiesto["tercero_documento"]
 df_result["MANIFIESTO"] = df_merge_manifiesto["manifiesto_codigo_impreso"]
+df_result["REMESA"] = df_merge_manifiesto["remesa_codigo_impreso"]
 df_result["PLACA"] = df_merge_manifiesto["vehiculo_placa"]
 
 # Merge para trater los campos de las tareas
@@ -81,24 +91,23 @@ df_result = pd.merge(df_result, df_workssteps_pivote, how="left", on="id")
 
 
 # Inicia  calculos:
-
 df_result["INICIO Round Trip"] = (df_result["INICIO DEL CARGUE"].sub(df_result["LLEGADA A PLANTA"]))
 df_result["TIEMPO DE CARGUE"] = (df_result["FIN DEL CARGUE"].sub(df_result["INICIO DEL CARGUE"]))
 df_result["TIEMPO DE SALIDA"] = (df_result["SALIDA DE PLANTA"].sub(df_result["FIN DEL CARGUE"]))
 df_result["TIEMPO EN RUTA"] = (df_result["LLEGADA A DESCARGUE"].sub(df_result["SALIDA DE PLANTA"]))
 df_result["INICIO LLEGADA A DESCARGAR"] = (df_result["INICIO DEL DESCARGUE"].sub(df_result["LLEGADA A DESCARGUE"]))
 df_result["TIEMPO DE DESCARGUE"] = (df_result["FIN DEL DESCARGUE"].sub(df_result["INICIO DEL DESCARGUE"]))
-df_result["TIEMPO DE SALIDA"] = (df_result["SALIDA DE DESCARGUE"].sub(df_result["FIN DEL DESCARGUE"]))
-df_result["TIEMPO EN RUTA"] = (df_result["VEHICULO RETORNADO A PLANTA POLAR"].sub(df_result["SALIDA DE DESCARGUE"]))
 df_result["TIEMPO TOTAL X VIAJE"] = df_result["VEHICULO RETORNADO A PLANTA POLAR"].sub(df_result["LLEGADA A PLANTA"])
 
 save_route = 'assets/informe_polar.xlsx'
-recipients = ["erney.vargas@mct.com.co", "nancy.medina@mct.com.co"]
-title = "Informe Tiempos APP Operacion Polar"
 df_result.to_excel(save_route)
-print("Termina construciion de DataFrame con Pandas")
+
+print("Termina construcion de DataFrame con Pandas")
 ExcelStyle().format_excel(save_route, dicc_reports)
 
 #Enviar_correo("ruta del archivo, "destinatarios", "titulo")
-Correo().send_mail(save_route, recipients, title)
+#recipients = ["erney.vargas@mct.com.co","nancy.medina@mct.com.co"]
+recipients = ["erney.vargas@mct.com.co"]
+title = "Informe Tiempos APP Operacion Polar"
 
+Correo().send_mail(save_route, recipients, title)

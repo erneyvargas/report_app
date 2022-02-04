@@ -23,7 +23,7 @@ class ExcelStyle:
 
         self.center_data(ws)
 
-        self.format_HH_MM_SS(ws,7,19)
+        self.format_HH_MM_SS(ws,7,20)
 
         # Guardado del nuevo Archivo Formateado
         print("Finaliza formateo de Archivo Excel Ruta: ",route)
@@ -82,58 +82,58 @@ class ExcelStyle:
                 message = message_wrote_all[('message_wrote', 'LLEGADA A PLANTA')]
                 if (type(message) == str) & (message != "") & (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row = i, column = 9).comment = comments
+                    ws.cell(row = i, column = 10).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'INGRESO A PLANTA')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=10).comment = comments
+                    ws.cell(row=i, column=11).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'INICIO DEL CARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=11).comment = comments
+                    ws.cell(row=i, column=12).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'FIN DEL CARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=12).comment = comments
+                    ws.cell(row=i, column=13).comment = comments
 
 
                 message = message_wrote_all[('message_wrote', 'SALIDA DE PLANTA')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=13).comment = comments
+                    ws.cell(row=i, column=14).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'LLEGADA A DESCARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=14).comment = comments
+                    ws.cell(row=i, column=15).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'INGRESO A DESCARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=15).comment = comments
+                    ws.cell(row=i, column=16).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'INICIO DEL DESCARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=16).comment = comments
+                    ws.cell(row=i, column=17).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'FIN DEL DESCARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=17).comment = comments
+                    ws.cell(row=i, column=18).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'SALIDA DE DESCARGUE')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=18).comment = comments
+                    ws.cell(row=i, column=19).comment = comments
 
                 message = message_wrote_all[('message_wrote', 'VEHICULO RETORNADO A PLANTA POLAR')]
                 if (type(message) == str) & (message != "")& (message != ".") & (message != ".."):
                     comments = Comment(message, "Funcionario MCT")
-                    ws.cell(row=i, column=19).comment = comments
+                    ws.cell(row=i, column=20).comment = comments
 
 
 
